@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Mail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Libre+Baskerville&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-burgundy: #9f0f2b;
+            --cherry-red: #d81f43;
+            --blush-pink: #ff6fa3;
+            --champagne-cream: #f7f0e2;
+        }
+        body {
+            margin: 0;
+            font-family: 'Libre Baskerville', serif;
+            background: url('https://www.transparenttextures.com/patterns/paper.png'), linear-gradient(to bottom right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
+            background-size: cover;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+        .envelope {
+            width: 200px;
+            height: 120px;
+            background: var(--cherry-red);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.6s ease;
+        }
+        .envelope:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: var(--deep-burgundy);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            transition: transform 0.6s ease;
+            transform-origin: top;
+        }
+        .envelope.open:before {
+            transform: rotateX(180deg);
+        }
+        .letter {
+            display: none;
+            width: 300px;
+            height: 200px;
+            background: var(--champagne-cream);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
+            text-align: center;
+        }
+        .wreath {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255, 0, 0, 0.5)" stroke-width="5"/><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255, 192, 203, 0.5)" stroke-width="5"/></svg>') no-repeat center;
+            z-index: -1;
+        }
+        .hidden {
+            display: none;
+        }
+        .question-page, .flowers-page {
+            display: none;
+            text-align: center;
+        }
+        .question-page.active, .flowers-page.active {
+            display: block;
+        }
+        .heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.5) 0%, rgba(255, 0, 0, 0) 70%);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .button {
+            background: var(--deep-burgundy);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .button:hover {
+            transform: scale(1.05);
+        }
+        .no-button:hover {
+            transform: translate(calc(-1px + (random() * 10)), calc(-1px + (random() * 10)));
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--champagne-cream);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal.active {
+            display: block;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="wreath"></div>
+    <div class="envelope" id="envelope">
+        <div class="letter hidden" id="letter">
+            <img src="https://via.placeholder.com/100" alt="Profile" />
+            <p>Dear <span id="recipientName"></span>,</p>
+            <p>With all my love,</p>
+            <p><span id="fromName"></span></p>
+        </div>
+    </div>
+    <div class="question-page" id="questionPage">
+        <h2>WILL YOU BE MY</h2>
+        <h1 style="font-family: 'Great Vibes', cursive;">Valentine?</h1>
+        <div class="heart"></div>
+        <button class="button" id="yesButton">YES</button>
+        <button class="button no-button" id="noButton">NO</button>
+        <button class="button" id="homeButton">Home</button>
+    </div>
+    <div class="flowers-page" id="flowersPage">
+        <h1 style="font-family: 'Great Vibes', cursive;">Flowers for you</h1>
+        <p>A bouquet of love just for you!</p>
+        <div>🌹</div>
+        <p>Choose your gift</p>
+        <div>
+            <button class="button" id="gift1">Letters</button>
+            <button class="button" id="gift2">Our Photos</button>
+            <button class="button" id="gift3">Song</button>
+        </div>
+    </div>
+    <div class="modal" id="modal1">
+        <span class="close" id="closeModal1">X</span>
+        <h2>Letters</h2>
+        <p>Your romantic letter goes here.</p>
+    </div>
+    <div class="modal" id="modal2">
+        <span class="close" id="closeModal2">X</span>
+        <h2>Our Photos</h2>
+        <div>
+            <img src="https://via.placeholder.com/100" alt="Photo 1" />
+            <img src="https://via.placeholder.com/100" alt="Photo 2" />
+            <img src="https://via.placeholder.com/100" alt="Photo 3" />
+        </div>
+    </div>
+    <div class="modal" id="modal3">
+        <span class="close" id="closeModal3">X</span>
+        <h2>Song</h2>
+        <iframe id="youtubeEmbed" width="300" height="169" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <script>
+        const CONFIG = {
+            recipientName: "Jane",
+            fromName: "John",
+            herPhoto: "path/to/photo.jpg",
+            photo1: "path/to/photo1.jpg",
+            photo2: "path/to/photo2.jpg",
+            photo3: "path/to/photo3.jpg",
+            youtubeUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        };
+
+        document.getElementById('recipientName').innerText = CONFIG.recipientName;
+        document.getElementById('fromName').innerText = CONFIG.fromName;
+
+        document.getElementById('envelope').addEventListener('click', function() {
+            this.classList.add('open');
+            document.getElementById('letter').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('questionPage').classList.add('active');
+            }, 600);
+        });
+
+        document.getElementById('yesButton').addEventListener('click', function() {
+            alert("Yay! 🎉");
+            // Add confetti hearts effect here
+        });
+
+        document.getElementById('noButton').addEventListener('mouseover', function() {
+            this.style.transform = `translate(${Math.random() * 10 - 5}px, ${Math.random() * 10 - 5}px)`;
+        });
+
+        document.getElementById('homeButton').addEventListener('click', function() {
+            document.getElementById('questionPage').classList.remove('active');
+            document.getElementById('envelope').classList.remove('open');
+            document.getElementById('letter').classList.add('hidden');
+        });
+
+        document.getElementById('gift1').addEventListener('click', function() {
+            document.getElementById('modal1').classList.add('active');
+        });
+
+        document.getElementById('gift2').addEventListener('click', function() {
+            document.getElementById('modal2').classList.add('active');
+        });
+
+        document.getElementById('gift3').addEventListener('click', function() {
+            document.getElementById('youtubeEmbed').src = CONFIG.youtubeUrl;
+            document.getElementById('modal3').classList.add('active');
+        });
+
+        document.querySelectorAll('.close').forEach(closeButton => {
+            closeButton.addEventListener('click', function() {
+                this.parentElement.classList.remove('active');
+            });
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
